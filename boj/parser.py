@@ -61,11 +61,3 @@ def get_solution_info(response):
 
     print(sols)
     return sols
-
-
-def get_source(response):
-    html = BeautifulSoup(response, 'html.parser')
-    print(html)
-    code = html.find(attrs={'class': 'CodeMirror-lines'}).text
-    print(code)
-    return code

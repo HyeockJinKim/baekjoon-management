@@ -12,6 +12,6 @@ if __name__ == '__main__':
     #     boj.get_solution_info(num)
 
     boj.login(password)
-    sol = boj.get_solution_info(6996)
-    boj.get_solution(6107157)
+    # sol = boj.get_solution_info(6996)
+    boj.get_solution(6107160)
 

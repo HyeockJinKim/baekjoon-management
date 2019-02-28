@@ -1,4 +1,4 @@
-from boj.loader import request_url
+from boj.net import get_url, process_cookie, post_url
 from boj import parser
 
 
@@ -9,16 +9,15 @@ class Boj:
         self.BOJ_LOGIN_URL = self.BOJ_URL + '/signin'
         self.BOJ_USER_URL = self.BOJ_URL + '/user/{}'
         self.BOJ_PROBLEM_URL = self.BOJ_URL+'/status?from_mine=1&problem_id={}&user_id={}'
-        self.BOJ_SOLUTION_URL = self.BOJ_URL+'/source/{}'
+        self.BOJ_SOLUTION_URL = self.BOJ_URL+'/source/download/{}'
         self.username = username
         self.cookie = None
 
     def login(self, password):
         """
-        Login Boj
+        Login Boj and save cookie
 
         :param password: password for login
-        :return:
         """
         url = self.BOJ_LOGIN_URL
         login_info = {
@@ -26,20 +25,20 @@ class Boj:
             'login_password': password
         }
 
-        res = request_url(url, data=login_info)
-        self.cookie = res.info()['Set-Cookie']
+        res = post_url(url, data=login_info)
+        self.cookie = process_cookie(res.headers['Set-Cookie'])
 
     def load_user_problems(self):
         """
         Load problems solved by user
 
+        :return: all problems solved by user
         """
 
         url = self.BOJ_USER_URL.format(self.username)
-        response = request_url(url).read()
+        response = get_url(url)
 
         problems = parser.get_all_problems(response)
-        print(problems)
 
         return problems
 
@@ -57,7 +56,7 @@ class Boj:
         problems_info = []
         for index in range(len(number)):
             url = self.BOJ_URL + number[index].a['href']
-            response = request_url(url)
+            response = get_url(url)
 
             data = parser.get_problem_info(response)
             data.update({
@@ -71,30 +70,26 @@ class Boj:
 
     def get_solution_info(self, num):
         """
+        Get user solution's info
 
         :param num:
         :return:
         """
 
         url = self.BOJ_PROBLEM_URL.format(num, self.username)
-        response = request_url(url).read()
+        response = get_url(url)
 
         problems = parser.get_solution_info(response)
         return problems
 
     def get_solution(self, index):
+        """
+        Get solution source
+
+        :param index:
+        :return:
+        """
         url = self.BOJ_SOLUTION_URL.format(index)
-        response = request_url(url, cookie=self.cookie).read()
+        response = get_url(url, cookie=self.cookie)
 
-        source = parser.get_source(response)
-
-        return source
-
-
-
-
-
-
-
-
-
+        return response.text
