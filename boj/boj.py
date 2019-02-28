@@ -1,17 +1,27 @@
 from boj.net import get_url, process_cookie, post_url
 from boj import parser
+from boj.saver import Saver
 
 
 class Boj:
 
     def __init__(self, username):
+        # URL for parsing
         self.BOJ_URL = 'https://www.acmicpc.net'
+        # URL for user cookie
         self.BOJ_LOGIN_URL = self.BOJ_URL + '/signin'
-        self.BOJ_USER_URL = self.BOJ_URL + '/user/{}'
-        self.BOJ_PROBLEM_URL = self.BOJ_URL+'/status?from_mine=1&problem_id={}&user_id={}'
-        self.BOJ_SOLUTION_URL = self.BOJ_URL+'/source/download/{}'
+        # URL for solution
+        self.BOJ_USER_URL = self.BOJ_URL + '/user/{}'  # username
+        self.BOJ_PROBLEM_URL = self.BOJ_URL + '/problem/{}'  # problem id
+        self.BOJ_SUBMISSION_URL = self.BOJ_URL + '/status?from_mine=1&problem_id={}&user_id={}'  # problem id, username
+        self.BOJ_SOLUTION_URL = self.BOJ_URL+'/source/download/{}'  # solution id
+
+        # user info of boj
         self.username = username
         self.cookie = None
+
+        # saver for info
+        self.saver = Saver()
 
     def login(self, password):
         """
@@ -76,7 +86,7 @@ class Boj:
         :return:
         """
 
-        url = self.BOJ_PROBLEM_URL.format(num, self.username)
+        url = self.BOJ_SUBMISSION_URL.format(num, self.username)
         response = get_url(url)
 
         problems = parser.get_solution_info(response)
