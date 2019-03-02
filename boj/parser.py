@@ -6,16 +6,20 @@ def get_all_problems(response):
     Get all problem's num, title through parsing html
 
     :param response: http response of request
-    :return:         problem info {problem_id, title}
+    :return:         problem info [{problem_id, title}]
     """
 
     html = BeautifulSoup(response, 'html.parser')
     html = html.find(attrs={'class': 'panel-body'})
+    problem_ids = [num.text for num in html.find_all(attrs={'class': 'problem_number'})]
+    titles = [title.text for title in html.find_all(attrs={'class': 'problem_title'})]
 
-    problems = {
-        'problem_id': [num.text for num in html.find_all(attrs={'class': 'problem_number'})],
-        'title': [title.text for title in html.find_all(attrs={'class': 'problem_title'})]
-    }
+    problems = []
+    for i in range(len(problem_ids)):
+        problems.append({
+            'problem_id': problem_ids[i],
+            'title': titles[i]
+        })
 
     return problems
 
@@ -25,7 +29,7 @@ def get_problem_info(response):
     Get problem's information
 
     :param response: http response of request
-    :return:         problem info {description, input, output}
+    :return:         problem info {limit_time, limit_memory, description, input, output}
     """
 
     html = BeautifulSoup(response, 'html.parser')
@@ -34,9 +38,16 @@ def get_problem_info(response):
         'limit_time': tds[0].text,                                           # time limit
         'limit_memory': tds[1].text,                                         # memory limit
         'description': html.find(attrs={'id': 'problem_description'}).text,  # html
-        'input': html.find(attrs={'id': 'problem_input'}).text,              # input description (string)
-        'output': html.find(attrs={'id': 'problem_output'}).text             # output description (string)
     }
+    try:
+        data['input'] = html.find(attrs={'id': 'problem_input'}).text        # input description (string)
+    except:
+        data['input'] = None
+    try:
+        data['output'] = html.find(attrs={'id': 'problem_output'}).text      # output description (string)
+    except:
+        data['output'] = None
+
     return data
 
 

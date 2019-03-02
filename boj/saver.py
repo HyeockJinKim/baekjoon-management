@@ -37,7 +37,7 @@ class Saver:
             # unknown user's solution
             id        Integer, Primary key              : solution id
             problem   Integer, Foreign key(problem(id)) : foreign key for problem id
-            success   Boolean                           : whether problem is solved or not
+            success   VARCHAR(50)                       : whether problem is solved or not
             memory    Integer                           : used memory for solving problem
             language  VARCHAR(50)                       : language for solving problem
             time      Integer                           : used time for solving problem
@@ -47,7 +47,7 @@ class Saver:
             # user's solution
             id        Integer, Primary key              : solution id
             problem   Integer, Foreign key(problem(id)) : foreign key for problem id
-            success   Boolean                           : whether problem is solved or not
+            success   VARCHAR(50)                       : whether problem is solved or not
             memory    Integer                           : used memory for solving problem
             language  VARCHAR(50)                       : language for solving problem
             time      Integer                           : used time for solving problem
@@ -176,7 +176,7 @@ class Saver:
         )
         return self.execute_insert_query(query, data=data)
 
-    def load_problem(self):
+    def load_all_problem_info(self):
         """
         Load problem table's information
         :return:

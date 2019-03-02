@@ -1,6 +1,32 @@
 from boj.net import get_url, process_cookie, post_url
 from boj import parser
-from boj.saver import Saver
+
+
+language_map = {
+    'C': '.c',
+    'C11': '.c',
+    'C++': '.cpp',
+    'C++11': '.cpp',
+    'C++14': '.cpp',
+    'C++17': '.cpp',
+    'C (Clang)': '.c',
+    'C11 (Clang)': '.c',
+    'C++ (Clang)': '.cpp',
+    'C++11 (Clang)': '.cpp',
+    'C++14 (Clang)': '.cpp',
+    'C++17 (Clang)': '.cpp',
+    'Java': '.java',
+    'Java (OpenJDK)': '.java',
+    'Java 11': '.java',
+    'Python 2': '.py',
+    'Python 3': '.py',
+    'PyPy2': '.py',
+    'PyPy3': '.py',
+    'Go': '.go',
+    'Ruby 2.5': '.rb',
+    'Kotlin (JVM)': '.kt',
+    'Kotlin (Native)': '.kt'
+}
 
 
 class Boj:
@@ -66,7 +92,7 @@ class Boj:
 
         :param number: problem_id
         :param title:  problem's title
-        :return:       problem's information {problem_id, title, description, input, output}
+        :return:       problem's information {problem_id, title, limit_time, limit_memory, description, input, output}
         """
 
         url = self.BOJ_PROBLEM_URL.format(number)
@@ -75,7 +101,7 @@ class Boj:
         if response.status_code == 200:
             data = parser.get_problem_info(response.text)
             data.update({
-                'problem_id': number,
+                'id': number,
                 'title': title,
             })
             return data
@@ -86,15 +112,12 @@ class Boj:
         Get information of user's problems
 
         :param problems: problem solved by user {problem_id, title}
-        :return:         problem's info {problem_id, title, description, input, output}
+        :return:         problem's info {problem_id, title, limit_time, limit_memory, description, input, output}
         """
 
-        number = problems['problem_id']
-        title = problems['title']
-
         problems_info = []
-        for index in range(len(number)):
-            data = self.get_problem_info(number[index], title[index])
+        for problem in range(problems):
+            data = self.get_problem_info(problem['id'], problem['title'])
             if data:
                 problems_info.append(data)
         return problems_info
