@@ -5,7 +5,7 @@ from boj.saver import Saver
 
 class Boj:
 
-    def __init__(self, username):
+    def __init__(self, username=None):
         # URL for parsing
         self.BOJ_URL = 'https://www.acmicpc.net'
         # URL for user cookie
@@ -20,9 +20,15 @@ class Boj:
         self.username = username
         self.cookie = None
 
-        # saver for info
-        self.saver = Saver()
-
+    """
+    Functions for boj Auto commit
+        login
+        load_user_problems
+        get_problems_info
+        get_solution_info
+        get_source
+    
+    """
     def login(self, password):
         """
         Login Boj and save cookie
@@ -42,64 +48,86 @@ class Boj:
         """
         Load problems solved by user
 
-        :return: all problems solved by user
+        :return: all problems solved by user {num, title}
         """
 
         url = self.BOJ_USER_URL.format(self.username)
         response = get_url(url)
 
-        problems = parser.get_all_problems(response)
+        if response.status_code == 200:
+            problems = parser.get_all_problems(response.text)
+            return problems
 
-        return problems
+        return None
 
-    def get_problems_info(self, problems):
+    def get_problem_info(self, number, title):
+        """
+        Get information of problem
+
+        :param number: problem_id
+        :param title:  problem's title
+        :return:       problem's information {problem_id, title, description, input, output}
+        """
+
+        url = self.BOJ_PROBLEM_URL.format(number)
+        response = get_url(url)
+
+        if response.status_code == 200:
+            data = parser.get_problem_info(response.text)
+            data.update({
+                'problem_id': number,
+                'title': title,
+            })
+            return data
+        return None
+
+    def get_multiple_problems_info(self, problems):
         """
         Get information of user's problems
 
-        :param problems: problem solved by user
-        :return:         problem's info
+        :param problems: problem solved by user {problem_id, title}
+        :return:         problem's info {problem_id, title, description, input, output}
         """
 
-        number = problems['num']
+        number = problems['problem_id']
         title = problems['title']
 
         problems_info = []
         for index in range(len(number)):
-            url = self.BOJ_URL + number[index].a['href']
-            response = get_url(url)
-
-            data = parser.get_problem_info(response)
-            data.update({
-                'num': number[index].text,
-                'title': title[index].text,
-                'link': url,
-            })
-            problems_info.append(data)
-
+            data = self.get_problem_info(number[index], title[index])
+            if data:
+                problems_info.append(data)
         return problems_info
 
-    def get_solution_info(self, num):
+    def get_solution_info(self, problem_id):
         """
         Get user solution's info
 
-        :param num:
-        :return:
+        :param problem_id: problem's id
+        :return:           user solution's information {problem_id, sols[{id, success, memory, time, language, length}]}
         """
 
-        url = self.BOJ_SUBMISSION_URL.format(num, self.username)
+        url = self.BOJ_SUBMISSION_URL.format(problem_id, self.username)
         response = get_url(url)
+        if response.status_code == 200:
+            problems = parser.get_solution_info(response.text)
+            info = {
+                'problem_id': problem_id,
+                'solutions':  problems
+            }
+            return info
+        return None
 
-        problems = parser.get_solution_info(response)
-        return problems
-
-    def get_solution(self, index):
+    def get_source(self, solution_id):
         """
         Get solution source
 
-        :param index:
-        :return:
+        :param solution_id:  solution id
+        :return:             solution source
         """
-        url = self.BOJ_SOLUTION_URL.format(index)
+        url = self.BOJ_SOLUTION_URL.format(solution_id)
         response = get_url(url, cookie=self.cookie)
 
-        return response.text
+        if response.status_code == 200:
+            return response.text
+        return None
