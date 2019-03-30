@@ -28,20 +28,20 @@ language_map = {
     'Kotlin (Native)': '.kt'
 }
 
+# URL for parsing
+BOJ_URL = 'https://www.acmicpc.net'
+# URL for user cookie
+BOJ_LOGIN_URL = BOJ_URL + '/signin'
+# URL for solution
+BOJ_USER_URL = BOJ_URL + '/user/{}'  # username
+BOJ_PROBLEM_URL = BOJ_URL + '/problem/{}'  # problem id
+BOJ_SUBMISSION_URL = BOJ_URL + '/status?from_mine=1&problem_id={}&user_id={}'  # problem id, username
+BOJ_SOLUTION_URL = BOJ_URL + '/source/download/{}'  # solution id
+
 
 class Boj:
 
     def __init__(self, username=None):
-        # URL for parsing
-        self.BOJ_URL = 'https://www.acmicpc.net'
-        # URL for user cookie
-        self.BOJ_LOGIN_URL = self.BOJ_URL + '/signin'
-        # URL for solution
-        self.BOJ_USER_URL = self.BOJ_URL + '/user/{}'  # username
-        self.BOJ_PROBLEM_URL = self.BOJ_URL + '/problem/{}'  # problem id
-        self.BOJ_SUBMISSION_URL = self.BOJ_URL + '/status?from_mine=1&problem_id={}&user_id={}'  # problem id, username
-        self.BOJ_SOLUTION_URL = self.BOJ_URL+'/source/download/{}'  # solution id
-
         # user info of boj
         self.username = username
         self.cookie = None
@@ -61,7 +61,7 @@ class Boj:
 
         :param password: password for login
         """
-        url = self.BOJ_LOGIN_URL
+        url = BOJ_LOGIN_URL
         login_info = {
             'login_user_id': self.username,
             'login_password': password
@@ -77,7 +77,7 @@ class Boj:
         :return: all problems solved by user {num, title}
         """
 
-        url = self.BOJ_USER_URL.format(self.username)
+        url = BOJ_USER_URL.format(self.username)
         response = get_url(url)
 
         if response.status_code == 200:
@@ -95,7 +95,7 @@ class Boj:
         :return:       problem's information {problem_id, title, limit_time, limit_memory, description, input, output}
         """
 
-        url = self.BOJ_PROBLEM_URL.format(number)
+        url = BOJ_PROBLEM_URL.format(number)
         response = get_url(url)
 
         if response.status_code == 200:
@@ -130,7 +130,7 @@ class Boj:
         :return:           user solution's information {problem_id, sols[{id, success, memory, time, language, length}]}
         """
 
-        url = self.BOJ_SUBMISSION_URL.format(problem_id, self.username)
+        url = BOJ_SUBMISSION_URL.format(problem_id, self.username)
         response = get_url(url)
         if response.status_code == 200:
             problems = parser.get_solution_info(response.text)
@@ -148,7 +148,7 @@ class Boj:
         :param solution_id:  solution id
         :return:             solution source
         """
-        url = self.BOJ_SOLUTION_URL.format(solution_id)
+        url = BOJ_SOLUTION_URL.format(solution_id)
         response = get_url(url, cookie=self.cookie)
 
         if response.status_code == 200:

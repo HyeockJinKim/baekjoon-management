@@ -1,17 +1,9 @@
-from boj import parser
-from boj.boj import Boj
-
+from cli.api import Api
 
 if __name__ == '__main__':
-    username = input()
-    password = input()
-    boj = Boj(username)
-    # problem = boj.load_user_problems()
-    # info = boj.get_problems_info(problem)
-    # for num in info['num']:
-    #     boj.get_solution_info(num)
+    api = Api('gurwls9628', home='./temp')
 
-    boj.login(password)
-    # sol = boj.get_solution_info(6996)
-    boj.get_solution(6107160)
-
+    # api.update_my_problem_info()
+    # api.update_my_solution_info()
+    api.update_source('gurwls28')
+    # api.write_readme('', 1000, [])
