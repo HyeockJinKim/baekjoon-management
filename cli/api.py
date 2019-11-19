@@ -1,6 +1,6 @@
 from os.path import join
-
-from boj.boj import Boj, language_map, BOJ_PROBLEM_URL
+from decocli.cli import CLI
+from boj.boj import Boj, language_map
 from boj.saver import Saver
 from boj.solution import filter_solution
 from git.local import write_main_readme, write_readme
@@ -11,12 +11,14 @@ class Api:
     def __init__(self, username=None, home='.'):
         self.home = home
         self.username = username
-
         self.src_dir = ''
         self.boj = Boj(self.username)
         self.saver = Saver(self.home)
-
+    
     def update_my_problem_info(self):
+        """
+        Update information on problem I've solved
+        """
         print('Update Problem')
 
         problems = self.boj.load_user_problems()
@@ -35,9 +37,13 @@ class Api:
         print('문제 업데이트 완료!!')
 
     def update_my_solution_info(self):
+        """
+        Update information on my solution
+        """
         print('Update Solution')
 
         problems = self.saver.load_all_problem_info()
+        print(problems)
         length = len(problems)
         index = 0
         for problem in problems:
@@ -54,6 +60,10 @@ class Api:
         print('Solution 리스트 업데이트 완료!!')
 
     def update_source(self, password):
+        """
+        Update source code
+        :param password:  password for login in boj
+        """
         print('Update Solution')
 
         sols = self.saver.load_solution()

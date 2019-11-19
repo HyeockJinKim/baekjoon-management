@@ -23,6 +23,7 @@ language_map = {
     'PyPy2': '.py',
     'PyPy3': '.py',
     'Go': '.go',
+    'Rust': '.rs',
     'Ruby 2.5': '.rb',
     'Kotlin (JVM)': '.kt',
     'Kotlin (Native)': '.kt'
@@ -86,13 +87,14 @@ class Boj:
 
         return None
 
-    def get_problem_info(self, number, title):
+    @staticmethod
+    def get_problem_info(number, title):
         """
         Get information of problem
 
         :param number: problem_id
         :param title:  problem's title
-        :return:       problem's information {problem_id, title, limit_time, limit_memory, description, input, output}
+        :return:       problem's information {id, title, limit_time, limit_memory, description, input, output}
         """
 
         url = BOJ_PROBLEM_URL.format(number)
@@ -107,17 +109,18 @@ class Boj:
             return data
         return None
 
-    def get_multiple_problems_info(self, problems):
+    @staticmethod
+    def get_multiple_problems_info(problems):
         """
         Get information of user's problems
 
-        :param problems: problem solved by user {problem_id, title}
-        :return:         problem's info {problem_id, title, limit_time, limit_memory, description, input, output}
+        :param problems: problem solved by user {id, title}
+        :return:         problem's info {id, title, limit_time, limit_memory, description, input, output}
         """
 
         problems_info = []
-        for problem in range(problems):
-            data = self.get_problem_info(problem['id'], problem['title'])
+        for problem in problems:
+            data = Boj.get_problem_info(problem['id'], problem['title'])
             if data:
                 problems_info.append(data)
         return problems_info

@@ -9,7 +9,7 @@ def mkdir_src_dir(home):
     return src_dir
 
 
-def mkdir_sol_dir(home, problem_id):
+def mkdir_sol_dir(home, problem_id, problem_name):
     src_dir = mkdir_src_dir(home)
     sol_dir = join(src_dir, str(problem_id))
     if not isdir(sol_dir):

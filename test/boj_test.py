@@ -11,19 +11,18 @@ class MyBojTest(unittest.TestCase):
         self.assertIsNotNone(problems)
 
     def test_get_problems_info(self):
-        boj = Boj(self.username)
-        info = {
-            'problem_id': [1000, ],
-            'title': ['A+B', ]
-        }
-        info = boj.get_multiple_problems_info(info)
+        info = [{
+            'id': 1000,
+            'title': 'A+B'
+        }]
+        info = Boj.get_multiple_problems_info(info)
         expected = [{
             'limit_time': '2 초',
             'limit_memory': '128 MB',
             'description': '\n두 정수 A와 B를 입력받은 다음,\xa0A+B를 출력하는 프로그램을 작성하시오.\n',
             'input': '\n첫째 줄에 A와 B가 주어진다. (0 < A, B < 10)\n',
             'output': '\n첫째 줄에 A+B를 출력한다.\n',
-            'problem_id': 1000,
+            'id': 1000,
             'title': 'A+B'
         }]
 
@@ -40,7 +39,7 @@ class MyBojTest(unittest.TestCase):
                 'memory': '1116',
                 'time': '0',
                 'language': 'C',
-                'length': '93'
+                'length': '88'
             }]}
 
         self.assertEqual(info, expected)
