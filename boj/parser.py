@@ -16,10 +16,11 @@ def get_all_problems(response):
 
     problems = []
     for i in range(len(problem_ids)):
-        problems.append({
+        problem = {
             'problem_id': problem_ids[i],
             'title': titles[i]
-        })
+        }
+        problems.append(problem)
 
     return problems
 
@@ -41,11 +42,11 @@ def get_problem_info(response):
     }
     try:
         data['input'] = html.find(attrs={'id': 'problem_input'}).text        # input description (string)
-    except:
+    except AttributeError:
         data['input'] = None
     try:
         data['output'] = html.find(attrs={'id': 'problem_output'}).text      # output description (string)
-    except:
+    except AttributeError:
         data['output'] = None
 
     return data

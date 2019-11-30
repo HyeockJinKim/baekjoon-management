@@ -41,7 +41,6 @@ BOJ_SOLUTION_URL = BOJ_URL + '/source/download/{}'  # solution id
 
 
 class Boj:
-
     def __init__(self, username=None):
         # user info of boj
         self.username = username
@@ -56,7 +55,7 @@ class Boj:
         get_source
     
     """
-    def login(self, password):
+    def login(self, password) -> bool:
         """
         Login Boj and save cookie
 
@@ -70,6 +69,7 @@ class Boj:
 
         res = post_url(url, data=login_info)
         self.cookie = process_cookie(res.headers['Set-Cookie'])
+        return self.cookie is not ''
 
     def load_user_problems(self):
         """
@@ -86,6 +86,13 @@ class Boj:
             return problems
 
         return None
+
+    def is_login(self):
+        """
+        Cookie is not None
+        :return:
+        """
+        return self.cookie is not None
 
     @staticmethod
     def get_problem_info(number, title):
@@ -136,12 +143,8 @@ class Boj:
         url = BOJ_SUBMISSION_URL.format(problem_id, self.username)
         response = get_url(url)
         if response.status_code == 200:
-            problems = parser.get_solution_info(response.text)
-            info = {
-                'problem_id': problem_id,
-                'solutions':  problems
-            }
-            return info
+            solutions = parser.get_solution_info(response.text)
+            return solutions
         return None
 
     def get_source(self, solution_id):

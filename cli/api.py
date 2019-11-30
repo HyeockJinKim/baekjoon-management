@@ -2,9 +2,9 @@ from os.path import join
 from decocli.cli import CLI
 from boj.boj import Boj, language_map
 from boj.saver import Saver
-from boj.solution import filter_solution
-from git.local import write_main_readme, write_readme
-from util.file import mkdir_sol_dir
+from boj.checker import filter_solution
+from git_tool.local import write_main_readme, write_readme
+from util.file import mk_problem_dir
 
 
 class Api:
@@ -74,7 +74,7 @@ class Api:
         index = 0
         write_main_readme(self.home, self.username)
         for problem_id in sols.keys():
-            sol_dir = mkdir_sol_dir(self.home, problem_id)
+            sol_dir = mk_problem_dir(self.home, problem_id)
             write_readme(self.saver, sol_dir, problem_id, sols[problem_id])
             for sol in sols[problem_id]:
                 filename = 'main'+language_map[sol[4]]

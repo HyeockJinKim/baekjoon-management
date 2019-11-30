@@ -1,5 +1,7 @@
 from os.path import join
 
+from boj.boj import language_map
+
 
 class Solution:
     """
@@ -26,14 +28,36 @@ class Solution:
         self.length = length
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.problem_id == other.problem_id and self.language == other.language
+
+    def __lt__(self, other):
+        if self.time < other.time:
+            return True
+        elif self.time > other.time:
+            return False
+
+        if self.memory < other.memory:
+            return True
+        elif self.memory > other.memory:
+            return False
+
+        if self.code < other.code:
+            return True
+
+        return False
 
     def __hash__(self):
         return self.id
 
+    def __repr__(self):
+        return '{:5d}_{:8d}'.format(self.problem_id, self.id)
+
+    def __str__(self):
+        return '{:5d}_{:8d}'.format(self.problem_id, self.id)
+
     @classmethod
-    def create(cls, solution_id: int, problem_id: int, code: str, success: bool,
-               memory: int, language: str, time: int, length: int):
+    def create(cls, problem_id: int=None, solution_id: int=None, code: str=None, success: bool=None,
+               memory: int=None, language: str=None, time: int=None, length: int=None):
         solution = Solution(
             solution_id=solution_id,
             problem_id=problem_id,
@@ -53,8 +77,54 @@ class Solution:
 
         return success in cls.correct_list
 
+    def crawl_source(self, boj):
+        """
+        Crawl problem information from boj
+        :param boj:
+        :return:
+        """
+        source = boj.get_source(self.id)
+        if not source:
+            return False
+
+        self.code = source
+        return True
+
+    def lower_time(self, other):
+        if self.time < other.time:
+            return True
+
+        if self.time == other.time:
+            return self.id > other.id
+
+        return False
+
+    def lower_memory(self, other):
+        if self.memory < other.memory:
+            return True
+
+        if self.memory == other.memory:
+            return self.id > other.id
+
+        return False
+
+    def lower_code_byte(self, other):
+        if self.code < other.code:
+            return True
+
+        if self.code == other.code:
+            return self.id > other.id
+
+        return False
+
     def src_file(self) -> str:
         return '{}.{}'.format(self.problem_id, self.language)
+
+    def update(self, directory: str) -> bool:
+        with open(join(directory, self.src_file())) as f:
+            f.write(self.code)
+
+        return True
 
     def write_code(self, directory: str) -> bool:
         with open(join(directory, self.src_file())) as f:

@@ -1,7 +1,6 @@
 from os.path import join
 
 from boj.boj import BOJ_URL, BOJ_USER_URL, BOJ_PROBLEM_URL, language_map
-import git
 
 
 def write_main_readme(home, username):

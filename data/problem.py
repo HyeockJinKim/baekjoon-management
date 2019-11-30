@@ -20,7 +20,8 @@ class Problem:
             solutions    dict{ key=lang: val=Solution } : problem's solutions
     """
     def __init__(self, problem_id: int, title: str,
-                 limit_time: int, limit_memory: int, category: str, description: str, inputs: str, outputs: str):
+                 limit_time: int=None, limit_memory: int=None, category: str=None,
+                 description: str=None, inputs: str=None, outputs: str=None):
         self.id: int = problem_id
         self.title = title
         self.limit_time = limit_time
@@ -29,7 +30,7 @@ class Problem:
         self.description = description
         self.inputs = inputs
         self.outputs = outputs
-        self.solutions = set()
+        self.solutions = {}
 
     def __eq__(self, other):
         return self.id == other.id
@@ -37,10 +38,16 @@ class Problem:
     def __hash__(self):
         return self.id
 
+    def __repr__(self):
+        return str(self.id)
+
+    def __str__(self):
+        return str(self.id)
+
     @classmethod
     def create(cls, *, problem_id: int, title: str,
                limit_time: int, limit_memory: int, description: str,
-               category: str = None, inputs: str = None, outputs: str = None):
+               category: str, inputs: str, outputs: str):
         """
         Create Problem Object
         :param problem_id:
@@ -67,22 +74,50 @@ class Problem:
         )
         return problem
 
-    def write_problem(self, home: str) -> bool:
-        directory = mk_problem_dir(home, self.id, self.title)
-        if not self.write_readme(directory):
-            return False
-
-        for lang, solution in self.solutions:
-            if not solution.write_code(directory):
+    def crawl_problem_info(self, boj):
+        """
+        Crawl problem information from boj
+        :param boj:
+        :return:
+        """
+        if not self.is_checked():
+            info = boj.get_problem_info(self.id, self.title)
+            if not info:
                 return False
 
+            self.update(
+                limit_time=info['limit_time'],
+                limit_memory=info['limit_memory'],
+                description=info['description'],
+                inputs=info['input'],
+                outputs=info['output']
+            )
         return True
 
-    def write_readme(self, directory: str) -> bool:
-        readme = self.readme()
-        with open(join(directory, "README.md")) as f:
-            f.write(readme)
+    def crawl_solution(self, boj):
+        """
+        Crawl problem information from boj
+        :param boj:
+        :return:
+        """
+        solutions = boj.get_solution_info(self.id)
+        if not solutions:
+            return False
+
+        for solution in solutions:
+            if self.solutions[solution.length]:
+                self.solutions[solution.length] = solution
+            elif solution < self.solutions[solution.length]:
+                self.solutions[solution.length] = solution
+
         return True
+
+    def is_checked(self):
+        """
+        Whether problem information is checked or not
+        :return:
+        """
+        return self.limit_time is not None
 
     def readme(self) -> str:
         """
@@ -118,3 +153,52 @@ class Problem:
                                        str(sol[3]) + ' KB', str(sol[6]) + ' B')
 
         return content
+
+    def update(self, problem_id: int=None, title: str=None,
+               limit_time: int=None, limit_memory: int=None, description: str=None,
+               category: str=None, inputs: str=None, outputs: str=None):
+        """
+        Update info
+        :param problem_id:
+        :param title:
+        :param limit_time:
+        :param limit_memory:
+        :param description:
+        :param category:
+        :param inputs:
+        :param outputs:
+        :return:
+        """
+        if problem_id:
+            self.id = problem_id
+        if title:
+            self.title = title
+        if limit_time:
+            self.limit_time = limit_time
+        if limit_memory:
+            self.limit_memory = limit_memory
+        if description:
+            self.description = description
+        if category:
+            self.category = category
+        if inputs:
+            self.inputs = inputs
+        if outputs:
+            self.outputs = outputs
+
+    def write_problem(self, home: str) -> bool:
+        directory = mk_problem_dir(home, self.id, self.title)
+        if not self.write_readme(directory):
+            return False
+
+        for lang, solution in self.solutions:
+            if not solution.write_code(directory):
+                return False
+
+        return True
+
+    def write_readme(self, directory: str) -> bool:
+        readme = self.readme()
+        with open(join(directory, "README.md")) as f:
+            f.write(readme)
+        return True
