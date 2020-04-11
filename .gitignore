@@ -3,3 +3,5 @@ venv/*
 temp/
 *.pyc
 *.db
+main.py
+*.userinfo.json

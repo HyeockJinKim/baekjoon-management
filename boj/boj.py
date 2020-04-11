@@ -1,162 +1,120 @@
-from boj.net import get_url, process_cookie, post_url
+import json
+from os.path import join
+from typing import List
+
 from boj import parser
+from boj.boj_url import BOJUrl
+from boj.net import post_url, process_cookie, get_url
+from boj.problem import Problem
+from boj.solution import Solution
 
 
-language_map = {
-    'C': '.c',
-    'C11': '.c',
-    'C++': '.cpp',
-    'C++11': '.cpp',
-    'C++14': '.cpp',
-    'C++17': '.cpp',
-    'C (Clang)': '.c',
-    'C11 (Clang)': '.c',
-    'C++ (Clang)': '.cpp',
-    'C++11 (Clang)': '.cpp',
-    'C++14 (Clang)': '.cpp',
-    'C++17 (Clang)': '.cpp',
-    'Java': '.java',
-    'Java (OpenJDK)': '.java',
-    'Java 11': '.java',
-    'Python 2': '.py',
-    'Python 3': '.py',
-    'PyPy2': '.py',
-    'PyPy3': '.py',
-    'Go': '.go',
-    'Rust': '.rs',
-    'Ruby 2.5': '.rb',
-    'Kotlin (JVM)': '.kt',
-    'Kotlin (Native)': '.kt'
-}
-
-# URL for parsing
-BOJ_URL = 'https://www.acmicpc.net'
-# URL for user cookie
-BOJ_LOGIN_URL = BOJ_URL + '/signin'
-# URL for solution
-BOJ_USER_URL = BOJ_URL + '/user/{}'  # username
-BOJ_PROBLEM_URL = BOJ_URL + '/problem/{}'  # problem id
-BOJ_SUBMISSION_URL = BOJ_URL + '/status?from_mine=1&problem_id={}&user_id={}'  # problem id, username
-BOJ_SOLUTION_URL = BOJ_URL + '/source/download/{}'  # solution id
-
-
-class Boj:
-    def __init__(self, username=None):
-        # user info of boj
-        self.username = username
-        self.cookie = None
-
+def read_user_info(path: str) -> (str, str):
     """
-    Functions for boj Auto commit
-        login
-        load_user_problems
-        get_problems_info
-        get_solution_info
-        get_source
-    
+    유저의 로그인을 위한 정보를 json에서 읽음
+    :param path: .userinfo.json 파일이 있는 경로
+    :return: .userinfo.json 에 적혀있는 유저 로그인 정보 (아이디, 비밀번호)
     """
-    def login(self, password) -> bool:
-        """
-        Login Boj and save cookie
+    if not path.endswith('.userinfo.json'):
+        path = join(path, '.userinfo.json')
+    with open(path, 'r') as f:
+        data = json.load(f)
+        return data['boj']['id'], data['boj']['password']
 
-        :param password: password for login
-        """
-        url = BOJ_LOGIN_URL
-        login_info = {
-            'login_user_id': self.username,
-            'login_password': password
-        }
 
-        res = post_url(url, data=login_info)
-        self.cookie = process_cookie(res.headers['Set-Cookie'])
-        return self.cookie is not ''
+def login(username: str = None, password: str = None) -> str:
+    """
+    BOJ 로그인 후 로그인 세션을 저장
 
-    def load_user_problems(self):
-        """
-        Load problems solved by user
+    :param username: 로그인을 위한 ID
+    :param password: 로그인을 위한 비밀번호
+    :return: 로그인 세션 쿠키
+    """
 
-        :return: all problems solved by user {num, title}
-        """
+    url = BOJUrl.LOGIN_URL
+    login_info = {
+        'login_user_id': username,
+        'login_password': password
+    }
 
-        url = BOJ_USER_URL.format(self.username)
-        response = get_url(url)
+    res = post_url(url, data=login_info)
+    return process_cookie(res.headers['Set-Cookie'])
 
-        if response.status_code == 200:
-            problems = parser.get_all_problems(response.text)
-            return problems
 
-        return None
+def load_user_problems(username: str) -> List[Problem]:
+    """
+    유저가 푼 문제 리스트를 전부 읽어옴
 
-    def is_login(self):
-        """
-        Cookie is not None
-        :return:
-        """
-        return self.cookie is not None
+    :param username: BOJ 아이디
+    :return: 유저가 푼 문제 전체 {num, title}
+    """
 
-    @staticmethod
-    def get_problem_info(number, title):
-        """
-        Get information of problem
+    url = BOJUrl.USER_URL.format(username)
+    response = get_url(url)
 
-        :param number: problem_id
-        :param title:  problem's title
-        :return:       problem's information {id, title, limit_time, limit_memory, description, input, output}
-        """
+    if response.status_code == 200:
+        problems = parser.get_all_problems(response.text)
+        return problems
+    return []
 
-        url = BOJ_PROBLEM_URL.format(number)
-        response = get_url(url)
 
-        if response.status_code == 200:
-            data = parser.get_problem_info(response.text)
-            data.update({
-                'id': number,
-                'title': title,
-            })
-            return data
-        return None
+def get_problem_info(problem: Problem):
+    """
+    문제 번호를 통해 문제 전체 정보를 읽어옴
 
-    @staticmethod
-    def get_multiple_problems_info(problems):
-        """
-        Get information of user's problems
+    :param problem: id 값과 title 값만 저장된 문제 정보
+    """
 
-        :param problems: problem solved by user {id, title}
-        :return:         problem's info {id, title, limit_time, limit_memory, description, input, output}
-        """
+    url = BOJUrl.PROBLEM_URL.format(problem.id)
+    response = get_url(url)
 
-        problems_info = []
-        for problem in problems:
-            data = Boj.get_problem_info(problem['id'], problem['title'])
-            if data:
-                problems_info.append(data)
-        return problems_info
+    if response.status_code == 200:
+        parser.get_problem_info(response.text, problem)
 
-    def get_solution_info(self, problem_id):
-        """
-        Get user solution's info
 
-        :param problem_id: problem's id
-        :return:           user solution's information {problem_id, sols[{id, success, memory, time, language, length}]}
-        """
+def get_multiple_problems_info(problems: List[Problem]) -> List[Problem]:
+    """
+    여러 개의 문제 정보를 읽어옴
 
-        url = BOJ_SUBMISSION_URL.format(problem_id, self.username)
-        response = get_url(url)
-        if response.status_code == 200:
-            solutions = parser.get_solution_info(response.text)
-            return solutions
-        return None
+    :param problems: id 값과 title 값만 저장된 문제 정보
+    :return:         Problem 모든 정보를 저장한 문제 정보
+    """
 
-    def get_source(self, solution_id):
-        """
-        Get solution source
+    problems_info = []
+    for problem in problems:
+        get_problem_info(problem)
 
-        :param solution_id:  solution id
-        :return:             solution source
-        """
-        url = BOJ_SOLUTION_URL.format(solution_id)
-        response = get_url(url, cookie=self.cookie)
+    return problems_info
 
-        if response.status_code == 200:
-            return response.text
-        return None
+
+def get_solution_info(problem_id, username) -> List[Solution]:
+    """
+    유저의 문제 풀이에 대한 정보를 가져옴
+
+    :param problem_id: 문제 번호
+    :param username: Boj 아이디
+    :return:           user solution's information {problem_id, sols[{id, success, memory, time, language, length}]}
+    """
+
+    url = BOJUrl.SUBMISSION_URL.format(problem_id, username)
+    response = get_url(url)
+    if response.status_code == 200:
+        solutions = parser.get_solution_info(response.text)
+        return solutions
+    return []
+
+
+def get_source(solution_id, cookie) -> str:
+    """
+    문제 풀이 소스코드
+
+    :param solution_id:  문제 번호
+    :param cookie: 로그인 세션이 저장된 쿠키
+    :return:             solution source
+    """
+    url = BOJUrl.SOLUTION_URL.format(solution_id)
+    response = get_url(url, cookie=cookie)
+
+    if response.status_code == 200:
+        return response.text
+    return None
