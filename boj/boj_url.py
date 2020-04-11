@@ -11,3 +11,6 @@ class BOJUrl(enum.Enum):
     PROBLEM_URL = BASE_URL + '/problem/{}'  # problem id
     SUBMISSION_URL = BASE_URL + '/status?from_mine=1&problem_id={}&user_id={}'  # problem id, username
     SOLUTION_URL = BASE_URL + '/source/download/{}'  # solution id
+
+    def format(self, *args) -> str:
+        return self.value.format(*args)

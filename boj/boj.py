@@ -65,7 +65,7 @@ def get_problem_info(problem: Problem):
     :param problem: id 값과 title 값만 저장된 문제 정보
     """
 
-    url = BOJUrl.PROBLEM_URL.format(problem.id)
+    url = BOJUrl.PROBLEM_URL.format(str(problem.id))
     response = get_url(url)
 
     if response.status_code == 200:
@@ -87,7 +87,7 @@ def get_multiple_problems_info(problems: List[Problem]) -> List[Problem]:
     return problems_info
 
 
-def get_solution_info(problem_id, username) -> List[Solution]:
+def get_solutions_info(problem_id, username) -> List[Solution]:
     """
     유저의 문제 풀이에 대한 정보를 가져옴
 
@@ -117,4 +117,3 @@ def get_source(solution_id, cookie) -> str:
 
     if response.status_code == 200:
         return response.text
-    return None

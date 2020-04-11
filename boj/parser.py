@@ -26,7 +26,7 @@ def get_all_problems(response):
 
     problems = []
     for i in range(len(problem_ids)):
-        problem = Problem(problem_ids[i], titles[i])
+        problem = Problem(int(problem_ids[i]), titles[i])
         problems.append(problem)
 
     return problems
@@ -84,7 +84,7 @@ def get_solution_info(response) -> List[Solution]:
         sol = solution.find_all('td')
 
         sols.append(Solution(
-            id=sol[0].text,
+            id=int(sol[0].text),
             success=sol[3].text,
             time=sol[5].text,
             memory=sol[4].text,
