@@ -5,3 +5,4 @@ temp/
 *.db
 main.py
 *.userinfo.json
+.pytest_cache
