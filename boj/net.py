@@ -62,11 +62,10 @@ def fast_get_multiple_url(url_list: List[str], cookie: str = None) -> List[str]:
     loop = asyncio.get_event_loop()
     future = asyncio.ensure_future(get_multiple_url(url_list, cookie))
     res = loop.run_until_complete(future)
-    loop.close()
     return res
 
 
-def post_url(url, data):
+def post_url(url: str, data):
     """
     Post 요청을 url로 보냄
 

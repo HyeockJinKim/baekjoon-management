@@ -1,6 +1,25 @@
-from boj.boj import get_problem_info, get_solutions_info, get_multiple_problems_info
+from boj.boj import get_problem_info, get_solutions_info, get_multiple_problems_info, get_multiple_solutions
 from boj.problem import Problem
 from boj.solution import Solution
+
+
+def check_problem_eq(a: Problem, b: Problem):
+    assert a.id == b.id
+    assert a.title == b.title
+    assert a.limit_time == b.limit_time
+    assert a.limit_memory == b.limit_memory
+    assert a.description == b.description
+    assert a.input == b.input
+    assert a.output == b.output
+
+
+def check_solution_eq(a: Solution, b: Solution):
+    assert a.id == b.id
+    assert a.success == b.success
+    assert a.time == b.time
+    assert a.memory == b.memory
+    assert a.language == b.language
+    assert a.length == b.length
 
 
 def test_boj_get_problem_info():
@@ -15,13 +34,7 @@ def test_boj_get_problem_info():
         input='\n첫째 줄에 A와 B가 주어진다. (0 < A, B < 10)\n',
         output='\n첫째 줄에 A+B를 출력한다.\n'
     )
-    assert problem.id == res.id
-    assert problem.title == res.title
-    assert problem.limit_time == res.limit_time
-    assert problem.limit_memory == res.limit_memory
-    assert problem.description == res.description
-    assert problem.input == res.input
-    assert problem.output == res.output
+    check_problem_eq(problem, res)
 
 
 def test_boj_get_solution_info():
@@ -36,12 +49,7 @@ def test_boj_get_solution_info():
         language='C',
         length='88'
     )
-    assert solutions[0].id == res.id
-    assert solutions[0].success == res.success
-    assert solutions[0].time == res.time
-    assert solutions[0].memory == res.memory
-    assert solutions[0].language == res.language
-    assert solutions[0].length == res.length
+    check_solution_eq(solutions[0], res)
 
 
 def test_boj_get_multiple_problem():
@@ -76,10 +84,17 @@ def test_boj_get_multiple_problem():
     ]
 
     for i in range(3):
-        assert problems[i].id == res[i].id
-        assert problems[i].title == res[i].title
-        assert problems[i].limit_time == res[i].limit_time
-        assert problems[i].limit_memory == res[i].limit_memory
-        assert problems[i].description == res[i].description
-        assert problems[i].input == res[i].input
-        assert problems[i].output == res[i].output
+        check_problem_eq(problems[i], res[i])
+
+
+def test_boj_get_multiple_solution():
+    problems = [Problem(1001, 'a'), Problem(1002, 'ab'), Problem(1003, 'ac')]
+    solutions = get_multiple_solutions(problems, 'gurwls9628')
+    res = [
+        Solution(id=6107160, success='맞았습니다!!', time='0', memory='1116', language='C', length='88'),
+        Solution(id=6657354, success='맞았습니다!!', time='148', memory='18288', language='Java', length='2404'),
+        Solution(id=6661713, success='맞았습니다!!', time='112', memory='14640', language='Java', length='1208')
+    ]
+
+    for i in range(3):
+        check_solution_eq(solutions[i], res[i])

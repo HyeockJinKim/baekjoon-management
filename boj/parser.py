@@ -83,13 +83,15 @@ def get_solution_info(response) -> List[Solution]:
     for solution in solutions:
         sol = solution.find_all('td')
 
-        sols.append(Solution(
-            id=int(sol[0].text),
-            success=sol[3].text,
-            time=sol[5].text,
-            memory=sol[4].text,
-            language=sol[6].text,
-            length=sol[7].text
-        ))
+        sols.append(
+            Solution(
+                id=int(sol[0].text),
+                success=sol[3].text,
+                time=sol[5].text,
+                memory=sol[4].text,
+                language=sol[6].text,
+                length=sol[7].text
+            )
+        )
 
     return sols

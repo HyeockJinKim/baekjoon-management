@@ -4,6 +4,7 @@ from typing import List
 
 from boj import parser
 from boj.boj_url import BOJUrl
+from boj.checker import filter_solution
 from boj.net import post_url, process_cookie, get_url, fast_get_multiple_url
 from boj.problem import Problem
 from boj.solution import Solution
@@ -87,13 +88,13 @@ def get_multiple_problems_info(problems: List[Problem]):
         parser.get_problem_info(response, problems[i])
 
 
-def get_solutions_info(problem_id, username) -> List[Solution]:
+def get_solutions_info(problem_id: str or int, username: str) -> List[Solution]:
     """
     유저의 문제 풀이에 대한 정보를 가져옴
 
     :param problem_id: 문제 번호
     :param username: Boj 아이디
-    :return:           user solution's information {problem_id, sols[{id, success, memory, time, language, length}]}
+    :return: 유저가 푼 문제 Solution
     """
 
     url = BOJUrl.SUBMISSION_URL.format(problem_id, username)
@@ -102,6 +103,25 @@ def get_solutions_info(problem_id, username) -> List[Solution]:
         solutions = parser.get_solution_info(response.text)
         return solutions
     return []
+
+
+def get_multiple_solutions(problems: List[Problem], username: str) -> List[Solution]:
+    """
+    여러 개의 문제에 대한 Solution 정보를 가져옴
+
+    :param problems: 풀었던 문제 리스트
+    :param username: Boj 아이디
+    :return: 풀었던 Solution 리스트
+    """
+    url_list = [BOJUrl.SUBMISSION_URL.format(problem.id, username) for problem in problems]
+    response_list = fast_get_multiple_url(url_list)
+
+    solutions = []
+    for i, response in enumerate(response_list):
+        sols = parser.get_solution_info(response)
+        solution = filter_solution(sols)
+        solutions.append(solution)
+    return solutions
 
 
 def get_source(solution_id, cookie) -> str:
@@ -117,3 +137,16 @@ def get_source(solution_id, cookie) -> str:
 
     if response.status_code == 200:
         return response.text
+
+
+def get_multiple_source(solutions: List[Solution], cookie: str) -> List[str]:
+    """
+    여러 개의 문제 풀이 소스 코드를 가져옴
+
+    :param solutions: 풀었던 solution에 대한 정보
+    :param cookie: 로그인 정보
+    :return: 소스코드 리스트
+    """
+    url_list = [BOJUrl.SOLUTION_URL.format(str(solution.id)) for solution in solutions]
+    response_list = fast_get_multiple_url(url_list, cookie)
+    return response_list
