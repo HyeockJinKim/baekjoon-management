@@ -4,7 +4,7 @@ from typing import List
 
 from boj import parser
 from boj.boj_url import BOJUrl
-from boj.net import post_url, process_cookie, get_url
+from boj.net import post_url, process_cookie, get_url, fast_get_multiple_url
 from boj.problem import Problem
 from boj.solution import Solution
 
@@ -72,19 +72,19 @@ def get_problem_info(problem: Problem):
         parser.get_problem_info(response.text, problem)
 
 
-def get_multiple_problems_info(problems: List[Problem]) -> List[Problem]:
+def get_multiple_problems_info(problems: List[Problem]):
     """
     여러 개의 문제 정보를 읽어옴
+    call by reference 이므로 수정된 값 parameter를 통해 전달
 
     :param problems: id 값과 title 값만 저장된 문제 정보
-    :return:         Problem 모든 정보를 저장한 문제 정보
     """
 
-    problems_info = []
-    for problem in problems:
-        get_problem_info(problem)
+    url_list = [BOJUrl.PROBLEM_URL.format(str(problem.id)) for problem in problems]
+    response_list = fast_get_multiple_url(url_list)
 
-    return problems_info
+    for i, response in enumerate(response_list):
+        parser.get_problem_info(response, problems[i])
 
 
 def get_solutions_info(problem_id, username) -> List[Solution]:
